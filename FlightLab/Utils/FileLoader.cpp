@@ -54,6 +54,32 @@ class FileLoader {
     }
 
 public:
+    static std::string resolveAssetPath(const std::string& relative) {
+        if (relative.empty()) {
+            return relative;
+        }
+
+        if (fileExists(relative)) {
+            return relative;
+        }
+
+        const std::string exeDir = getExeDir();
+        if (!exeDir.empty()) {
+            const std::vector<std::string> candidates = {
+                exeDir + "\\" + relative,
+                exeDir + "\\..\\" + relative,
+                exeDir + "\\..\\..\\" + relative
+            };
+            for (const auto& candidate : candidates) {
+                if (fileExists(candidate)) {
+                    return candidate;
+                }
+            }
+        }
+
+        return relative;
+    }
+
     static std::string getButtonTexture(SimulationObjectType buttonType) {
         INIReader reader(resolvePathsIni());
 

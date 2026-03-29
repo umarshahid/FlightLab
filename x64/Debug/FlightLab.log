@@ -1,30 +1,25 @@
 ﻿C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Microsoft\VC\v170\Microsoft.CppBuild.targets(538,5): warning MSB8028: The intermediate directory (D:\repos\FlightLab\x64\Debug\) contains files shared from another project (AircraftSimulation.vcxproj).  This can lead to incorrect clean and rebuild behavior.
-  Aircraft.cpp
-D:\repos\FlightLab\FlightLab\Objects\Aircraft.cpp(139,30): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-D:\repos\FlightLab\FlightLab\Objects\Aircraft.cpp(141,30): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-D:\repos\FlightLab\FlightLab\Objects\Aircraft.cpp(174,27): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-D:\repos\FlightLab\FlightLab\Objects\Aircraft.cpp(285,18): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
-D:\repos\FlightLab\FlightLab\Objects\Aircraft.cpp(286,18): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
   RenderManager.cpp
-D:\repos\FlightLab\FlightLab\Randerer\RenderManager.cpp(405,18): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
-D:\repos\FlightLab\FlightLab\Randerer\RenderManager.cpp(406,18): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
-D:\repos\FlightLab\FlightLab\Randerer\RenderManager.cpp(421,39): warning C4838: conversion from 'int' to 'float' requires a narrowing conversion
-D:\repos\FlightLab\FlightLab\Randerer\RenderManager.cpp(421,39): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
-D:\repos\FlightLab\FlightLab\Randerer\RenderManager.cpp(421,69): warning C4838: conversion from 'int' to 'float' requires a narrowing conversion
-D:\repos\FlightLab\FlightLab\Randerer\RenderManager.cpp(421,69): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
-D:\repos\FlightLab\FlightLab\Randerer\RenderManager.cpp(421,91): warning C4838: conversion from 'int' to 'float' requires a narrowing conversion
-D:\repos\FlightLab\FlightLab\Randerer\RenderManager.cpp(421,91): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
-D:\repos\FlightLab\FlightLab\Randerer\RenderManager.cpp(421,106): warning C4838: conversion from 'int' to 'float' requires a narrowing conversion
-D:\repos\FlightLab\FlightLab\Randerer\RenderManager.cpp(421,106): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
-D:\repos\FlightLab\FlightLab\Randerer\RenderManager.cpp(692,66): warning C4244: 'argument': conversion from 'double' to 'int', possible loss of data
-D:\repos\FlightLab\FlightLab\Randerer\RenderManager.cpp(692,55): warning C4244: 'argument': conversion from 'double' to 'int', possible loss of data
-D:\repos\FlightLab\FlightLab\Randerer\RenderManager.cpp(692,44): warning C4244: 'argument': conversion from 'double' to 'int', possible loss of data
-D:\repos\FlightLab\FlightLab\Randerer\RenderManager.cpp(692,35): warning C4244: 'argument': conversion from 'double' to 'int', possible loss of data
-D:\repos\FlightLab\FlightLab\Randerer\RenderManager.cpp(726,22): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-D:\repos\FlightLab\FlightLab\Randerer\RenderManager.cpp(727,23): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-D:\repos\FlightLab\FlightLab\Randerer\RenderManager.cpp(728,24): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-D:\repos\FlightLab\FlightLab\Randerer\RenderManager.cpp(797,18): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
-D:\repos\FlightLab\FlightLab\Randerer\RenderManager.cpp(798,18): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
+D:\repos\FlightLab\FlightLab\Randerer\RenderManager.cpp(462,18): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
+D:\repos\FlightLab\FlightLab\Randerer\RenderManager.cpp(463,18): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
+D:\repos\FlightLab\FlightLab\Randerer\RenderManager.cpp(478,39): warning C4838: conversion from 'int' to 'float' requires a narrowing conversion
+D:\repos\FlightLab\FlightLab\Randerer\RenderManager.cpp(478,39): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
+D:\repos\FlightLab\FlightLab\Randerer\RenderManager.cpp(478,69): warning C4838: conversion from 'int' to 'float' requires a narrowing conversion
+D:\repos\FlightLab\FlightLab\Randerer\RenderManager.cpp(478,69): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
+D:\repos\FlightLab\FlightLab\Randerer\RenderManager.cpp(478,91): warning C4838: conversion from 'int' to 'float' requires a narrowing conversion
+D:\repos\FlightLab\FlightLab\Randerer\RenderManager.cpp(478,91): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
+D:\repos\FlightLab\FlightLab\Randerer\RenderManager.cpp(478,106): warning C4838: conversion from 'int' to 'float' requires a narrowing conversion
+D:\repos\FlightLab\FlightLab\Randerer\RenderManager.cpp(478,106): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
+D:\repos\FlightLab\FlightLab\Randerer\RenderManager.cpp(749,66): warning C4244: 'argument': conversion from 'double' to 'int', possible loss of data
+D:\repos\FlightLab\FlightLab\Randerer\RenderManager.cpp(749,55): warning C4244: 'argument': conversion from 'double' to 'int', possible loss of data
+D:\repos\FlightLab\FlightLab\Randerer\RenderManager.cpp(749,44): warning C4244: 'argument': conversion from 'double' to 'int', possible loss of data
+D:\repos\FlightLab\FlightLab\Randerer\RenderManager.cpp(749,35): warning C4244: 'argument': conversion from 'double' to 'int', possible loss of data
+D:\repos\FlightLab\FlightLab\Randerer\RenderManager.cpp(783,22): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+D:\repos\FlightLab\FlightLab\Randerer\RenderManager.cpp(784,23): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+D:\repos\FlightLab\FlightLab\Randerer\RenderManager.cpp(785,24): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+D:\repos\FlightLab\FlightLab\Randerer\RenderManager.cpp(854,18): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
+D:\repos\FlightLab\FlightLab\Randerer\RenderManager.cpp(855,18): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
+  main.cpp
   Generating Code...
   FlightLab.vcxproj -> D:\repos\FlightLab\x64\Debug\FlightLab.exe
   0 File(s) copied

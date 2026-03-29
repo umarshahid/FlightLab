@@ -36,8 +36,11 @@ class RenderManager
 	SDL_Renderer* renderer;
 	std::vector<Button> buttons;
 	bool quit;
-	float angle = 0.0f;
+    float angle = 0.0f;
     float zoom = 1.0f;
+    bool showGrid = true;
+    bool showMap = true;
+    bool showAirways = true;
 
 public:
 	RenderManager(const RenderManager&) = delete;

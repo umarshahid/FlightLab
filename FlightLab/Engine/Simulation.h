@@ -60,6 +60,7 @@ public:
     Aircraft* get_selected_aircraft();
     void clear_selected_aircraft();
     bool plan_path_for_selected(float dest_lat, float dest_lon);
+    void build_airways_from_python();
     int add_airway_node(const std::string& name, float lat, float lon);
     void add_airway_edge(int from_id, int to_id, float cost);
     void clear_airways();

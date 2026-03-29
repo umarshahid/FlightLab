@@ -68,41 +68,83 @@ RenderManager::RenderManager() : window(nullptr), renderer(nullptr), quit(false)
 	Simulation::get_instance().setCoordinateSystem(-90.0f, 90.0f, -180.0f, 180.0f, mapWidth, windowHeight);
     Simulation::get_instance().setZoom(zoom);
 
-    buttons.push_back({ {1030, 10, 44, 44}, "Red", SimulationObjectType::Aircraft, "Red Aircraft", "Add a red aircraft", [this]() {
+    buttons.push_back({ {1030, 10, 36, 36}, "Red", SimulationObjectType::Aircraft, "Red Aircraft", "Add a red aircraft",
+        "assets/icons/button/aircraft.png", [this]() {
         Simulation::get_instance().onButtonclick("red");
     } });
-    buttons.push_back({ {1030, 60, 44, 44}, "Blue", SimulationObjectType::Aircraft, "Blue Aircraft", "Add a blue aircraft", [this]() {
+    buttons.push_back({ {1030, 50, 36, 36}, "Blue", SimulationObjectType::Aircraft, "Blue Aircraft", "Add a blue aircraft",
+        "assets/icons/button/aircraft.png", [this]() {
         Simulation::get_instance().onButtonclick("blue");
     } });
 
-    buttons.push_back({ {1030, 120, 44, 44}, "Red", SimulationObjectType::Waypoint, "Red Waypoint", "Place a red waypoint", [this]() {
+    buttons.push_back({ {1030, 95, 36, 36}, "Red", SimulationObjectType::Waypoint, "Red Waypoint", "Place a red waypoint",
+        "assets/icons/button/waypoint.png", [this]() {
         Simulation::get_instance().onButtonclick("red-waypoint");
     } });
-    buttons.push_back({ {1030, 170, 44, 44}, "Blue", SimulationObjectType::Waypoint, "Blue Waypoint", "Place a blue waypoint", [this]() {
+    buttons.push_back({ {1030, 135, 36, 36}, "Blue", SimulationObjectType::Waypoint, "Blue Waypoint", "Place a blue waypoint",
+        "assets/icons/button/waypoint.png", [this]() {
         Simulation::get_instance().onButtonclick("blue-waypoint");
     } });
 
-    buttons.push_back({ {1030, 230, 44, 44}, "Green", SimulationObjectType::Path, "Path Plan", "Select aircraft then destination", [this]() {
+    buttons.push_back({ {1030, 190, 36, 36}, "Green", SimulationObjectType::Path, "Path Plan", "Select aircraft then destination",
+        "assets/icons/button/plan.png", [this]() {
         Simulation::get_instance().setDeployMode(SimulationObjectType::Path);
     } });
 
-    buttons.push_back({ {1030, 550, 44, 44}, "Green", SimulationObjectType::Unknown, "Run Script", "Run Python script hooks", [this]() { Simulation::get_instance().initialize(); } });
+    buttons.push_back({ {1030, 230, 36, 36}, "Green", SimulationObjectType::Unknown, "Airways", "Show/Hide airway routes",
+        "assets/icons/button/arrow.png", [this]() {
+        showAirways = !showAirways;
+        if (showAirways) {
+            Simulation::get_instance().build_airways_from_python();
+        }
+    } });
+
+    buttons.push_back({ {1030, 275, 36, 36}, "Green", SimulationObjectType::Unknown, "Toggle Grid", "Show/Hide lat/lon grid",
+        "assets/icons/circle.png", [this]() {
+        showGrid = !showGrid;
+    } });
+
+    buttons.push_back({ {1030, 315, 36, 36}, "Green", SimulationObjectType::Unknown, "Toggle Map", "Show/Hide map render",
+        "assets/icons/button/home.png", [this]() {
+        showMap = !showMap;
+    } });
+
+    buttons.push_back({ {1030, 365, 36, 36}, "Green", SimulationObjectType::Unknown, "Run Script", "Run Python script hooks",
+        "assets/icons/button/door_enter.png", [this]() { Simulation::get_instance().initialize(); } });
 
 }
 
 void RenderManager::onWindowResized(int newWidth, int newHeight) {
-    int buttonSpacing = 10;
-    int buttonWidth = 44;
-    int buttonHeight = 44;
+    int buttonSpacing = 8;
+    int buttonWidth = 36;
+    int buttonHeight = 36;
     int sidebarWidth = 260;
 
     int startX = newWidth - sidebarWidth + 20;
-    int startY = 80;
+    int y = 80;
+    auto setBtn = [&](size_t idx, int yPos) {
+        if (idx < buttons.size()) {
+            SDL_Rect newRect = { startX, yPos, buttonWidth, buttonHeight };
+            buttons[idx].setRect(newRect);
+        }
+    };
 
-    for (size_t i = 0; i < buttons.size(); ++i) {
-        SDL_Rect newRect = { startX, startY + static_cast<int>(i) * (buttonHeight + buttonSpacing), buttonWidth, buttonHeight };
-        buttons[i].setRect(newRect);
-    }
+    // SIM group
+    setBtn(0, y); y += buttonHeight + buttonSpacing;
+    setBtn(1, y); y += buttonHeight + buttonSpacing;
+    setBtn(2, y); y += buttonHeight + buttonSpacing;
+    setBtn(3, y); y += buttonHeight + buttonSpacing;
+
+    // PATH/SCRIPT group
+    y += 18;
+    setBtn(4, y); y += buttonHeight + buttonSpacing;
+    setBtn(5, y); y += buttonHeight + buttonSpacing;
+    setBtn(8, y); y += buttonHeight + buttonSpacing;
+
+    // TOGGLES group
+    y += 18;
+    setBtn(6, y); y += buttonHeight + buttonSpacing;
+    setBtn(7, y); y += buttonHeight + buttonSpacing;
 
     int mapWidth = newWidth - sidebarWidth;
     Simulation::get_instance().setScreenSize(mapWidth, newHeight);
@@ -159,15 +201,21 @@ void RenderManager::run() {
         int mapWidth = newWidth - sidebarWidth;
         int mapHeight = newHeight;
 
-        // Render shapefile within the map viewport
-        std::string shapefilePathStr = FileLoader::getMapFile();
-        const char* shapefilePath = shapefilePathStr.c_str();
-        RenderShapefile(renderer, shapefilePath, mapWidth, mapHeight);
+        if (showMap) {
+            // Render shapefile within the map viewport
+            std::string shapefilePathStr = FileLoader::getMapFile();
+            const char* shapefilePath = shapefilePathStr.c_str();
+            RenderShapefile(renderer, shapefilePath, mapWidth, mapHeight);
+        }
 
-        drawGrid(Simulation::get_instance().getCoordinateSystem());
+        if (showGrid) {
+            drawGrid(Simulation::get_instance().getCoordinateSystem());
+        }
 
         // Render airways (nodes + edges)
-        drawAirways();
+        if (showAirways) {
+            drawAirways();
+        }
 
         // Sidebar background
         SDL_Rect sidebar = { mapWidth, 0, sidebarWidth, newHeight };
@@ -179,7 +227,16 @@ void RenderManager::run() {
         SDL_Color titleColor{ 220, 220, 220, 255 };
         drawText("FLIGHTLAB", mapWidth + 20, 20, 2, titleColor);
         SDL_Color sectionColor{ 130, 130, 130, 255 };
-        drawText("TOOLS", mapWidth + 20, 50, 1, sectionColor);
+        drawText("SIM", mapWidth + 20, 50, 1, sectionColor);
+
+        SDL_SetRenderDrawColor(renderer, 60, 60, 60, 255);
+        SDL_RenderDrawLine(renderer, mapWidth + 20, 70, mapWidth + sidebarWidth - 20, 70);
+
+        drawText("PATH/SCRIPT", mapWidth + 20, 250, 1, sectionColor);
+        SDL_RenderDrawLine(renderer, mapWidth + 20, 270, mapWidth + sidebarWidth - 20, 270);
+
+        drawText("TOGGLES", mapWidth + 20, 410, 1, sectionColor);
+        SDL_RenderDrawLine(renderer, mapWidth + 20, 430, mapWidth + sidebarWidth - 20, 430);
 
         // Render buttons on the remaining right side (full window space)
         int hoverIndex = -1;

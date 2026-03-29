@@ -503,6 +503,22 @@ void Simulation::initialize() {
 
 }
 
+void Simulation::build_airways_from_python() {
+    try {
+        py::gil_scoped_acquire gil;
+        if (pybind11::hasattr(behavior_module, "build_airways")) {
+            behavior_module.attr("build_airways")();
+            LogMessage("[python] build_airways called");
+        } else {
+            LogMessage("[python] build_airways not found");
+        }
+    }
+    catch (const pybind11::error_already_set& e) {
+        std::cerr << "Python error: " << e.what() << "\n";
+        LogMessage(std::string("[python] build_airways error: ") + e.what());
+    }
+}
+
 void Simulation::remove_aircraft(Aircraft* target) {
     aircrafts.erase(
         std::remove_if(aircrafts.begin(), aircrafts.end(),
