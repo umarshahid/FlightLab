@@ -10,6 +10,7 @@ static std::string simulationObjectTypeToString(SimulationObjectType type) {
     case SimulationObjectType::Aircraft: return "Aircraft";
     case SimulationObjectType::Waypoint: return "Waypoint";
     case SimulationObjectType::Missile: return "Missile";
+    case SimulationObjectType::Path: return "Path";
     default: return "Unknown";
     }
 }

@@ -8,6 +8,7 @@
 #include <algorithm>
 #include "Missile.h"
 #include <unordered_set>
+#include <deque>
 
 
 
@@ -33,6 +34,7 @@ private:
 
     bool is_moving; // Flag to indicate if the aircraft is moving
     std::string iconPath;
+    std::deque<std::pair<float, float>> path_queue;
 
     Radar radar;
 
@@ -84,12 +86,16 @@ public:
     void perform_radar_scan();
 	inline bool get_isMoving() { return is_moving; }
 	inline Radar* getRadar() { return &radar; }
+    void set_path(const std::vector<std::pair<float, float>>& path);
+    void clear_path();
+    bool has_path() const;
+    const std::deque<std::pair<float, float>>& get_path() const;
 
     // Missile management
     Missile* missile{nullptr};  // Pointer to missile (single missile for simplicity)
 
     void launch_missile();
-    void update_missile(double dt, Vector3 targetPos, Vector3 targetVel);
+    void update_missile(double dt, std::pair<float, float> targetPos);
 
 private:
     void update_position(double dt); // Gradually move towards the target

@@ -80,17 +80,26 @@ class Button {
     std::string force;                  // Button color
     SimulationObjectType buttonType;    // Type of the button (Aircraft, Waypoint, etc.)
     std::string iconPath;               // Path to the button icon
+    std::string iconOverride;
+    std::string label;
+    std::string tooltip;
 
 public:
     std::function<void()> onClick;      // Callback for button click
 
-    Button(const SDL_Rect& rect, std::string force, SimulationObjectType buttonType, std::function<void()> onClick)
-        : rect(rect), force(std::move(force)), buttonType(buttonType), onClick(std::move(onClick)) {
+    Button(const SDL_Rect& rect, std::string force, SimulationObjectType buttonType,
+        std::string label, std::string tooltip, std::string iconOverride,
+        std::function<void()> onClick)
+        : rect(rect), force(std::move(force)), buttonType(buttonType),
+        label(std::move(label)), tooltip(std::move(tooltip)),
+        iconOverride(std::move(iconOverride)), onClick(std::move(onClick)) {
         iconPath = FileLoader::getButtonTexture(buttonType);
     }
 
     void render(SDL_Renderer* renderer) const {
-        SDL_Texture* buttonTexture = loadTexture(renderer, iconPath);
+        const std::string& iconToUse = iconOverride.empty() ? iconPath : iconOverride;
+        std::string resolved = FileLoader::resolveAssetPath(iconToUse);
+        SDL_Texture* buttonTexture = loadTexture(renderer, resolved);
         if (!buttonTexture) return;
 
         SDL_Rect renderQuad = {
@@ -112,6 +121,9 @@ public:
 
     // Getter for rect
     const SDL_Rect& getRect() const { return rect; }
+    const std::string& getLabel() const { return label; }
+    const std::string& getTooltip() const { return tooltip; }
+    SimulationObjectType getType() const { return buttonType; }
 
     // Setter for rect
     void setRect(const SDL_Rect& newRect) { rect = newRect; }

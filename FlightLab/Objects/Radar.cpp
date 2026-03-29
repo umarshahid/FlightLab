@@ -12,7 +12,7 @@ Radar::Radar(int radius, float angle) : radarRadius(radius), radarAngle(angle) {
 }
 
 
-std::vector<std::reference_wrapper<Aircraft>> Radar::getEntitiesInRadarCone(std::vector<std::unique_ptr<Aircraft>>& entities, int centerX, int centerY, float heading) {
+std::vector<std::reference_wrapper<Aircraft>> Radar::getEntitiesInRadarCone(std::vector<std::unique_ptr<Aircraft>>& entities, float centerLat, float centerLon, float heading, float geoRadius) {
     std::vector<std::reference_wrapper<Aircraft>> entitiesInCone;
 
     // Convert heading and angles to radians
@@ -21,20 +21,18 @@ std::vector<std::reference_wrapper<Aircraft>> Radar::getEntitiesInRadarCone(std:
     float rightBound = normalizeAngle(radarHeadingRad + (radarAngle * M_PI / 180.0f));
 
     for (auto& entity : entities) {
-        // Calculate the vector from radar center to the entity
-        int dx = entity->get_position3().x - centerX;
-        int dy = entity->get_position3().y - centerY;
+        auto pos = entity->get_position();
+        float dlat = pos.first - centerLat;
+        float dlon = pos.second - centerLon;
 
-        // Calculate the distance from the center
-        float distance = std::sqrt(dx * dx + dy * dy);
+        float distance = std::sqrt(dlat * dlat + dlon * dlon);
 
         // Ignore entities outside the radar radius
-        if (distance > radarRadius) {
+        if (distance > geoRadius) {
             continue;
         }
 
-        // Calculate the angle of the entity relative to the radar center
-        float entityAngle = std::atan2(dy, dx);
+        float entityAngle = std::atan2(dlon, dlat);
         entityAngle = normalizeAngle(entityAngle);
 
         // Check if the entity is within the cone's angle range

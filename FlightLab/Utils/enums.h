@@ -6,6 +6,7 @@ enum class SimulationObjectType {
 	Aircraft, 
 	Waypoint, 
 	Missile, 
+	Path,
 	Unknown 
 };
 

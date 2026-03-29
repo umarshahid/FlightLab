@@ -25,7 +25,7 @@ public:
     Radar(Radar&&) noexcept = default;
     Radar& operator=(Radar&&) noexcept = default;
 
-    std::vector<std::reference_wrapper<Aircraft>> getEntitiesInRadarCone(std::vector<std::unique_ptr<Aircraft>>& entities, int centerX, int centerY, float heading);
+    std::vector<std::reference_wrapper<Aircraft>> getEntitiesInRadarCone(std::vector<std::unique_ptr<Aircraft>>& entities, float centerLat, float centerLon, float heading, float geoRadius);
     float normalizeAngle(float angle);
 
 	inline int getRadarRadius() const { return radarRadius; }
