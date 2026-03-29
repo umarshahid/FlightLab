@@ -1,0 +1,155 @@
+[python] set_simulation called
+[python] initialize call_once()
+[python] set_simulation called
+[python] initialize call_once()
+[python] set_simulation called
+[python] plan_path called
+[python] plan_path error: AttributeError: module 'aircraft_behavior' has no attribute 'plan_path'
+[python] plan_path called
+[python] plan_path error: AttributeError: module 'aircraft_behavior' has no attribute 'plan_path'
+[python] plan_path called
+[python] plan_path error: AttributeError: module 'aircraft_behavior' has no attribute 'plan_path'
+[python] initialize call_once()
+[python] set_simulation called
+[python] initialize call_once()
+[python] imported module: flight_behavior
+[python] set_simulation called
+[python] initialize run_script()
+[python] call_once error: AttributeError: 'flight_lab.Simulation' object has no attribute 'clear_airways'
+
+At:
+  D:\repos/FlightLab/FlightLab/PyFlight\flight_behavior.py(52): build_airways
+  D:\repos/FlightLab/FlightLab/PyFlight\flight_behavior.py(69): run_script
+
+[python] plan_path called
+[python] plan_path returned 38 points
+[python] plan_path called
+[python] plan_path returned 38 points
+[python] imported module: flight_behavior
+[python] flight_behavior file: D:\repos/FlightLab/FlightLab/PyFlight\flight_behavior.py
+[python] flight_lab file: D:\repos\FlightLab\x64\Debug\flight_lab.cp312-win_amd64.pyd
+[python] set_simulation called
+[python] initialize run_script()
+[python] call_once error: AttributeError: 'flight_lab.Simulation' object has no attribute 'clear_airways'
+
+At:
+  D:\repos/FlightLab/FlightLab/PyFlight\flight_behavior.py(52): build_airways
+  D:\repos/FlightLab/FlightLab/PyFlight\flight_behavior.py(69): run_script
+
+[python] imported module: flight_behavior
+[python] flight_behavior file: D:\repos/FlightLab/FlightLab/PyFlight\flight_behavior.py
+[python] flight_lab file: D:\repos\FlightLab\x64\Debug\flight_lab.cp312-win_amd64.pyd
+[python] set_simulation called
+[python] initialize run_script()
+[python] call_once error: AttributeError: 'flight_lab.Simulation' object has no attribute 'clear_airways'
+
+At:
+  D:\repos/FlightLab/FlightLab/PyFlight\flight_behavior.py(52): build_airways
+  D:\repos/FlightLab/FlightLab/PyFlight\flight_behavior.py(69): run_script
+
+[python] imported module: flight_behavior
+[python] flight_behavior file: D:\repos/FlightLab/FlightLab/PyFlight\flight_behavior.py
+[python] flight_lab file: D:\repos/FlightLab/FlightLab/Bind\flight_lab.cp312-win_amd64.pyd
+[python] set_simulation called
+[python] initialize run_script()
+[python] run_script completed
+[python] plan_path called
+[python] plan_path returned 22 points
+[python] imported module: flight_behavior
+[python] flight_behavior file: D:\repos/FlightLab/FlightLab/PyFlight\flight_behavior.py
+[python] flight_lab file: D:\repos/FlightLab/FlightLab/Bind\flight_lab.cp312-win_amd64.pyd
+[python] set_simulation called
+[python] imported module: flight_behavior
+[python] flight_behavior file: D:\repos/FlightLab/FlightLab/PyFlight\flight_behavior.py
+[python] flight_lab file: D:\repos/FlightLab/FlightLab/Bind\flight_lab.cp312-win_amd64.pyd
+[python] set_simulation called
+[python] initialize run_script()
+[python] run_script completed
+[python] initialize run_script()
+[python] run_script completed
+[python] initialize run_script()
+[python] run_script completed
+[python] imported module: flight_behavior
+[python] flight_behavior file: D:\repos/FlightLab/FlightLab/PyFlight\flight_behavior.py
+[python] flight_lab file: D:\repos/FlightLab/FlightLab/Bind\flight_lab.cp312-win_amd64.pyd
+[python] set_simulation called
+[python] initialize run_script()
+[python] run_script completed
+[python] initialize run_script()
+[python] run_script completed
+[python] imported module: flight_behavior
+[python] flight_behavior file: D:\repos/FlightLab/FlightLab/PyFlight\flight_behavior.py
+[python] flight_lab file: D:\repos/FlightLab/FlightLab/Bind\flight_lab.cp312-win_amd64.pyd
+[python] set_simulation called
+[python] initialize run_script()
+[python] run_script completed
+[python] imported module: flight_behavior
+[python] flight_behavior file: D:\repos/FlightLab/FlightLab/PyFlight\flight_behavior.py
+[python] flight_lab file: D:\repos/FlightLab/FlightLab/Bind\flight_lab.cp312-win_amd64.pyd
+[python] set_simulation called
+[python] initialize run_script()
+[python] run_script completed
+[python] imported module: flight_behavior
+[python] flight_behavior file: D:\repos/FlightLab/FlightLab/PyFlight\flight_behavior.py
+[python] flight_lab file: D:\repos/FlightLab/FlightLab/Bind\flight_lab.cp312-win_amd64.pyd
+[python] set_simulation called
+[python] imported module: flight_behavior
+[python] flight_behavior file: D:\repos/FlightLab/FlightLab/PyFlight\flight_behavior.py
+[python] flight_lab file: D:\repos/FlightLab/FlightLab/Bind\flight_lab.cp312-win_amd64.pyd
+[python] set_simulation called
+[python] initialize run_script()
+[python] run_script completed
+[python] imported module: flight_behavior
+[python] flight_behavior file: D:\repos/FlightLab/FlightLab/PyFlight\flight_behavior.py
+[python] flight_lab file: D:\repos/FlightLab/FlightLab/Bind\flight_lab.cp312-win_amd64.pyd
+[python] set_simulation called
+[python] imported module: flight_behavior
+[python] flight_behavior file: D:\repos/FlightLab/FlightLab/PyFlight\flight_behavior.py
+[python] flight_lab file: D:\repos/FlightLab/FlightLab/Bind\flight_lab.cp312-win_amd64.pyd
+[python] set_simulation called
+[python] imported module: flight_behavior
+[python] flight_behavior file: D:\repos/FlightLab/FlightLab/PyFlight\flight_behavior.py
+[python] flight_lab file: D:\repos/FlightLab/FlightLab/Bind\flight_lab.cp312-win_amd64.pyd
+[python] set_simulation called
+[python] imported module: flight_behavior
+[python] flight_behavior file: D:\repos/FlightLab/FlightLab/PyFlight\flight_behavior.py
+[python] flight_lab file: D:\repos/FlightLab/FlightLab/Bind\flight_lab.cp312-win_amd64.pyd
+[python] set_simulation called
+[python] imported module: flight_behavior
+[python] flight_behavior file: D:\repos/FlightLab/FlightLab/PyFlight\flight_behavior.py
+[python] flight_lab file: D:\repos/FlightLab/FlightLab/Bind\flight_lab.cp312-win_amd64.pyd
+[python] set_simulation called
+[python] imported module: flight_behavior
+[python] flight_behavior file: D:\repos/FlightLab/FlightLab/PyFlight\flight_behavior.py
+[python] flight_lab file: D:\repos/FlightLab/FlightLab/Bind\flight_lab.cp312-win_amd64.pyd
+[python] set_simulation called
+[python] imported module: flight_behavior
+[python] flight_behavior file: D:\repos/FlightLab/FlightLab/PyFlight\flight_behavior.py
+[python] flight_lab file: D:\repos/FlightLab/FlightLab/Bind\flight_lab.cp312-win_amd64.pyd
+[python] set_simulation called
+[python] imported module: flight_behavior
+[python] flight_behavior file: D:\repos/FlightLab/FlightLab/PyFlight\flight_behavior.py
+[python] flight_lab file: D:\repos/FlightLab/FlightLab/Bind\flight_lab.cp312-win_amd64.pyd
+[python] set_simulation called
+[python] imported module: flight_behavior
+[python] flight_behavior file: D:\repos/FlightLab/FlightLab/PyFlight\flight_behavior.py
+[python] flight_lab file: D:\repos/FlightLab/FlightLab/Bind\flight_lab.cp312-win_amd64.pyd
+[python] set_simulation called
+[python] imported module: flight_behavior
+[python] flight_behavior file: D:\repos/FlightLab/FlightLab/PyFlight\flight_behavior.py
+[python] flight_lab file: D:\repos/FlightLab/FlightLab/Bind\flight_lab.cp312-win_amd64.pyd
+[python] set_simulation called
+[python] imported module: flight_behavior
+[python] flight_behavior file: D:\repos/FlightLab/FlightLab/PyFlight\flight_behavior.py
+[python] flight_lab file: D:\repos/FlightLab/FlightLab/Bind\flight_lab.cp312-win_amd64.pyd
+[python] set_simulation called
+[python] imported module: flight_behavior
+[python] flight_behavior file: D:\repos/FlightLab/FlightLab/PyFlight\flight_behavior.py
+[python] flight_lab file: D:\repos/FlightLab/FlightLab/Bind\flight_lab.cp312-win_amd64.pyd
+[python] set_simulation called
+[python] plan_path called
+[python] plan_path returned 26 points
+[python] plan_path called
+[python] plan_path returned 47 points
+[python] plan_path called
+[python] plan_path returned 7 points

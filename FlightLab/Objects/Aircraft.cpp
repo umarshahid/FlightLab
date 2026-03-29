@@ -23,7 +23,6 @@ Aircraft::Aircraft(const std::string& name, const std::string& force, int health
     position.x = get_position_xy().first;
     position.y = get_position_xy().second;
     position.z = altitude;
-    speed = 400;
     velocity = calculateVelocityFromAirspeed(speed, heading, 5.0);
     radar = Radar(150, 45.0f);
 }
@@ -106,46 +105,61 @@ void Aircraft::move_to(float newLatitude, float newLongitude) {
     is_moving = true; // Start moving
 }
 
+void Aircraft::set_path(const std::vector<std::pair<float, float>>& path) {
+    path_queue.clear();
+    for (const auto& p : path) {
+        path_queue.push_back(p);
+    }
+}
+
+void Aircraft::clear_path() {
+    path_queue.clear();
+}
+
+bool Aircraft::has_path() const {
+    return !path_queue.empty();
+}
+
+const std::deque<std::pair<float, float>>& Aircraft::get_path() const {
+    return path_queue;
+}
+
 void Aircraft::update_position(double dt) {
     if (!is_moving) return;
 
-    // Target position
-    Vector3 target_position(get_target_position_xy().first, get_target_position_xy().second, 0);
+    float dlat = target_latitude - latitude;
+    float dlon = target_longitude - longitude;
+    float distance = std::sqrt(dlat * dlat + dlon * dlon);
 
-    // Compute the target heading (direction to target)
-    Vector3 direction = target_position - position;
-    float target_heading = std::atan2(direction.y, direction.x) * 180.0f / M_PI + 90.0f;
-
-    // Smoothly rotate towards target heading
-    float rotation_speed = 10.0f * dt;  // Adjust rotation speed based on dt
-    float heading_diff = target_heading - heading;
-
-    // Normalize the heading difference to range [-180, 180]
-    if (heading_diff > 180.0f) heading_diff -= 360.0f;
-    if (heading_diff < -180.0f) heading_diff += 360.0f;
-
-    // Clamp the change in heading
-    heading += std::clamp(heading_diff, -rotation_speed, rotation_speed);
-    //heading += std::clamp(heading_diff, ( - rotation_speed * float(dt)), (rotation_speed * float(dt)));
-
-
-    // Ensure heading remains within [-180, 180]
-    if (heading > 180.0f) heading -= 360.0f;
-    if (heading < -180.0f) heading += 360.0f;
-
-    // Move **in the direction of the current heading**, not directly to the target
-    float move_speed = 10.0f * dt; // Adjust movement speed
-    float heading_rad = (heading - 90.0f) * M_PI / 180.0f; // Convert degrees to radians
-
-    // Move in the heading direction
-    position.x += move_speed * std::cos(heading_rad);
-    position.y += move_speed * std::sin(heading_rad);
-
-    // Stop when close to the target
-    if ((position - target_position).magnitude() < 0.5f) {
-        position = target_position;
+    if (distance <= 0.0001f) {
+        latitude = target_latitude;
+        longitude = target_longitude;
         is_moving = false;
+    } else {
+        float target_heading = std::atan2(dlon, dlat) * 180.0f / M_PI;
+
+        float rotation_speed = 90.0f * dt;
+        float heading_diff = target_heading - heading;
+        if (heading_diff > 180.0f) heading_diff -= 360.0f;
+        if (heading_diff < -180.0f) heading_diff += 360.0f;
+        heading += std::clamp(heading_diff, -rotation_speed, rotation_speed);
+
+        float move_speed = speed * static_cast<float>(dt);
+        if (move_speed >= distance) {
+            latitude = target_latitude;
+            longitude = target_longitude;
+            is_moving = false;
+        } else {
+            latitude += (dlat / distance) * move_speed;
+            longitude += (dlon / distance) * move_speed;
+        }
     }
+
+    coordinateSystem.wrap_coordinates(latitude, longitude);
+    auto screen = get_position_xy();
+    position.x = screen.first;
+    position.y = screen.second;
+    position.z = altitude;
 
     //std::cout << "target position: ";
     //target_position.print();
@@ -205,12 +219,23 @@ void Aircraft::update(double dt) {
         return;
     }
 
+    if (!is_moving && !path_queue.empty()) {
+        auto next = path_queue.front();
+        path_queue.pop_front();
+        move_to(next.first, next.second);
+    }
+
+    auto screen = get_position_xy();
+    position.x = screen.first;
+    position.y = screen.second;
+    position.z = altitude;
+
     // Update the position if the aircraft is moving
     update_position(dt);
 
     // Update missile (if current target exists)
     if (current_target)
-        update_missile(dt, current_target->get_position3(), current_target->get_velocity());
+        update_missile(dt, current_target->get_position());
 
 	RenderManager::get_instance().drawAircraft(this);
 
@@ -233,13 +258,13 @@ void Aircraft::update(double dt) {
 
 void Aircraft::launch_missile() {
     if (!missile) {
-        // Launch missile from current position with initial velocity (speed) and max acceleration
-        missile = new Missile(heading, force, position, velocity, 1000.0, 10.0);  // Example values for missile speed and max acceleration
+        auto pos = get_position();
+        missile = new Missile(heading, force, pos.first, pos.second, &coordinateSystem, 0.5, 10.0);
         std::cout << "Missile launched!\n";
     }
 }
 
-void Aircraft::update_missile(double dt, Vector3 targetPos, Vector3 targetVel) {
+void Aircraft::update_missile(double dt, std::pair<float, float> targetPos) {
     if (missile) {
         if (missile->hit) {
             std::cout << "[MISSILE HIT] " << current_target->get_name() << " destroyed!\n";
@@ -252,7 +277,7 @@ void Aircraft::update_missile(double dt, Vector3 targetPos, Vector3 targetVel) {
             delete missile;
             missile = nullptr;
         } else
-            missile->update(targetPos, targetVel, dt);  // Update missile trajectory and check for collision
+            missile->update(targetPos.first, targetPos.second, dt);  // Update missile trajectory and check for collision
     }
 }
 
@@ -261,10 +286,13 @@ void Aircraft::perform_radar_scan() {
     int screen_y = get_position3().y;
 
     auto& simulation = Simulation::get_instance();
+    double baseScale = simulation.getCoordinateSystem().get_map_base_scale();
+    if (baseScale <= 0.0001) baseScale = 1.0;
+    float geoRadius = static_cast<float>(radar.getRadarRadius() / baseScale);
     auto& allAircrafts = simulation.get_aircrafts_mutable();
 
     std::vector<std::reference_wrapper<Aircraft>> detectedEntities =
-        radar.getEntitiesInRadarCone(allAircrafts, screen_x, screen_y, get_heading() - 90);
+        radar.getEntitiesInRadarCone(allAircrafts, latitude, longitude, get_heading(), geoRadius);
 
     std::unordered_set<int> engagedTargets; // Keeps track of already targeted entities
 

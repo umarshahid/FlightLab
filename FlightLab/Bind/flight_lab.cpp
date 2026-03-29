@@ -32,7 +32,10 @@ PYBIND11_MODULE(flight_lab, m) {
         }
         return aircrafts_raw;
         }, py::return_value_policy::reference_internal)
-        .def("get_waypoints", &Simulation::get_waypoints, py::return_value_policy::reference_internal);
+        .def("get_waypoints", &Simulation::get_waypoints, py::return_value_policy::reference_internal)
+        .def("add_airway_node", &Simulation::add_airway_node)
+        .def("add_airway_edge", &Simulation::add_airway_edge)
+        .def("clear_airways", &Simulation::clear_airways);
         //.def("is_quit", &Simulation::is_quit);
 
     m.def("get_simulation_instance", []() -> Simulation& {

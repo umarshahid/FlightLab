@@ -1,64 +1,69 @@
 #include "Missile.h"
 #include "../Randerer/RenderManager.h"
+#include "../Engine/World/CoordinateSystem.h"
+#include <algorithm>
 
 // Constructor
-Missile::Missile(float heading, std::string force, Vector3 launchPos, Vector3 launchVel, double missileSpeed, double maxAccel)
-    : heading(heading), force(force), position(launchPos), velocity(launchVel), speed(missileSpeed), maxAcceleration(maxAccel), active(true) {
+Missile::Missile(float heading, std::string force, float lat, float lon, CoordinateSystem* coordSystem, double missileSpeed, double maxAccel)
+    : heading(heading), force(force), speed(missileSpeed), maxAcceleration(maxAccel), active(true),
+    latitude(lat), longitude(lon), coordinateSystem(coordSystem) {
 }
 
 // Update Function
-void Missile::update(Vector3 targetPos, Vector3 targetVel, double dt) {
+void Missile::update(float targetLat, float targetLon, double dt) {
     if (!active) return;
 
-    _targetPos = targetPos;
+    target_latitude = targetLat;
+    target_longitude = targetLon;
 
-    updatePosition(targetPos, targetVel, dt);
+    updatePosition(targetLat, targetLon, dt);
     RenderManager::get_instance().drawMissile(this);
 }
 
-void Missile::updatePosition(const Vector3& targetPos, const Vector3& targetVel, double dt) {
+void Missile::updatePosition(float targetLat, float targetLon, double dt) {
     if (!active) return;
 
-    // Target position
-    // Compute the target heading (direction to target)
-    Vector3 direction = targetPos - position;
-    float target_heading = std::atan2(direction.y, direction.x) * 180.0f / M_PI + 90.0f;
+    float dlat = targetLat - latitude;
+    float dlon = targetLon - longitude;
+    float distance = std::sqrt(dlat * dlat + dlon * dlon);
 
-    // Smoothly rotate towards target heading
-    float rotation_speed = 30.0f * dt;  // Adjust rotation speed based on dt
-    float heading_diff = target_heading - heading;
-
-    // Normalize the heading difference to range [-180, 180]
-    if (heading_diff > 180.0f) heading_diff -= 360.0f;
-    if (heading_diff < -180.0f) heading_diff += 360.0f;
-
-    // Clamp the change in heading
-    heading += std::clamp(heading_diff, -rotation_speed, rotation_speed);
-
-    // Ensure heading remains within [-180, 180]
-    if (heading > 180.0f) heading -= 360.0f;
-    if (heading < -180.0f) heading += 360.0f;
-
-    // Move **in the direction of the current heading**, not directly to the target
-    float move_speed = 30.0f * dt; // Adjust movement speed
-    float heading_rad = (heading - 90.0f) * M_PI / 180.0f; // Convert degrees to radians
-
-    // Move in the heading direction
-    position.x += move_speed * std::cos(heading_rad);
-    position.y += move_speed * std::sin(heading_rad);
-
-    // Stop when close to the target
-    if ((position - targetPos).magnitude() < 1.5f) {
-        position = targetPos;
+    if (distance <= 0.0005f) {
+        latitude = targetLat;
+        longitude = targetLon;
         active = false;
 		hit = true;
         std::cout << "reached.......";
+        return;
     }
 
+    float target_heading = std::atan2(dlon, dlat) * 180.0f / M_PI;
+    float rotation_speed = 180.0f * dt;
+    float heading_diff = target_heading - heading;
+    if (heading_diff > 180.0f) heading_diff -= 360.0f;
+    if (heading_diff < -180.0f) heading_diff += 360.0f;
+    heading += std::clamp(heading_diff, -rotation_speed, rotation_speed);
+
+    float move_speed = static_cast<float>(speed * dt);
+    if (move_speed >= distance) {
+        latitude = targetLat;
+        longitude = targetLon;
+        active = false;
+        hit = true;
+        return;
+    }
+
+    latitude += (dlat / distance) * move_speed;
+    longitude += (dlon / distance) * move_speed;
+
+    if (coordinateSystem) {
+        coordinateSystem->wrap_coordinates(latitude, longitude);
+    }
 }
 
 Vector3 Missile::get_position3() const {
-    return position;
+    if (!coordinateSystem) return Vector3(0, 0, 0);
+    auto screen = coordinateSystem->to_screen_coordinates(latitude, longitude);
+    return Vector3(screen.first, screen.second, 0.0);
 }
 
 double Missile::getHeading() {
@@ -78,4 +83,9 @@ void Missile::set_heading(float new_heading) {
     if (heading < 0) {
         heading += 360.0f; // Normalize negative headings
     }
+}
+
+std::pair<int, int> Missile::get_target_position_xy() const {
+    if (!coordinateSystem) return { 0, 0 };
+    return coordinateSystem->to_screen_coordinates(target_latitude, target_longitude);
 }

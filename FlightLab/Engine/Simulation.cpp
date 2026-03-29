@@ -2,6 +2,15 @@
 #include <iostream>
 #include <stdexcept>
 #include <atomic> // For thread-safe running state
+#include <cmath>
+#include <fstream>
+
+static void LogMessage(const std::string& msg) {
+    std::ofstream log("flightlab.log", std::ios::app);
+    if (log.is_open()) {
+        log << msg << "\n";
+    }
+}
 
 
 // Initialize the static instance to nullptr
@@ -15,8 +24,41 @@ Simulation::Simulation(): running(false) //coordSystem(-90.0f, 90.0f, -180.0f, 1
     //################################ python ################################
 
     // Pass the simulation object to Python
-    py::object py_sim = py::cast(this);
-    behavior_module.attr("set_simulation")(py_sim);
+    {
+        py::gil_scoped_acquire gil;
+        try {
+            py::module sys = py::module::import("sys");
+            py::list sys_path = sys.attr("path");
+            sys_path.append("D:/repos/FlightLab/FlightLab/PyFlight");
+            sys_path.insert(0, "D:/repos/FlightLab/FlightLab/Bind");
+
+            py::dict modules = sys.attr("modules");
+            if (modules.contains("flight_lab")) {
+                modules.attr("pop")("flight_lab");
+                LogMessage("[python] cleared cached module: flight_lab");
+            }
+
+            behavior_module = py::module::import("flight_behavior");
+            LogMessage("[python] imported module: flight_behavior");
+            if (pybind11::hasattr(behavior_module, "__file__")) {
+                std::string mod_file = pybind11::str(behavior_module.attr("__file__"));
+                LogMessage(std::string("[python] flight_behavior file: ") + mod_file);
+            }
+
+            py::module flight_lab_mod = py::module::import("flight_lab");
+            if (pybind11::hasattr(flight_lab_mod, "__file__")) {
+                std::string mod_file = pybind11::str(flight_lab_mod.attr("__file__"));
+                LogMessage(std::string("[python] flight_lab file: ") + mod_file);
+            }
+
+            py::object py_sim = py::cast(this);
+            behavior_module.attr("set_simulation")(py_sim);
+            LogMessage("[python] set_simulation called");
+        }
+        catch (const pybind11::error_already_set& e) {
+            LogMessage(std::string("[python] set_simulation error: ") + e.what());
+        }
+    }
 
     //################################ python ################################
 }
@@ -35,8 +77,27 @@ CoordinateSystem Simulation::getCoordinateSystem() {
     return coordSystem;
 }
 
+void Simulation::setZoom(float zoom) {
+    coordSystem.set_zoom(zoom);
+}
+
+void Simulation::setCoordinateBounds(float min_lat, float max_lat, float min_lon, float max_lon) {
+    coordSystem.set_bounds(min_lat, max_lat, min_lon, max_lon);
+}
+
+void Simulation::setScreenSize(int screen_w, int screen_h) {
+    coordSystem.set_screen_size(screen_w, screen_h);
+}
+
+void Simulation::setMapTransform(double min_x, double max_x, double min_y, double max_y, int screen_w, int screen_h, float zoom_level) {
+    coordSystem.set_map_transform(min_x, max_x, min_y, max_y, screen_w, screen_h, zoom_level);
+}
+
 void Simulation::setDeployMode(SimulationObjectType dm) {
     deployMode = dm;
+    if (deployMode != SimulationObjectType::Path) {
+        selectedAircraftId = -1;
+    }
 }
 
 SimulationObjectType Simulation::getDeployMode() {
@@ -49,6 +110,126 @@ std::string Simulation::getSelectedAircraft() {
 
 std::string Simulation::getSelectedWaypoint() {
     return selectedWaypoint;
+}
+
+Aircraft* Simulation::get_aircraft_by_id(int id) {
+    for (auto& aircraft : aircrafts) {
+        if (aircraft && aircraft->get_id() == id) {
+            return aircraft.get();
+        }
+    }
+    return nullptr;
+}
+
+bool Simulation::select_aircraft_at(int screen_x, int screen_y, float radius) {
+    float best_dist = radius;
+    int best_id = -1;
+    for (auto& aircraft : aircrafts) {
+        if (!aircraft) continue;
+        auto pos = aircraft->get_position_xy();
+        float dx = static_cast<float>(pos.first - screen_x);
+        float dy = static_cast<float>(pos.second - screen_y);
+        float dist = std::sqrt(dx * dx + dy * dy);
+        if (dist <= best_dist) {
+            best_dist = dist;
+            best_id = aircraft->get_id();
+        }
+    }
+
+    selectedAircraftId = best_id;
+    return selectedAircraftId != -1;
+}
+
+bool Simulation::has_selected_aircraft() const {
+    return selectedAircraftId != -1;
+}
+
+Aircraft* Simulation::get_selected_aircraft() {
+    if (selectedAircraftId == -1) return nullptr;
+    return get_aircraft_by_id(selectedAircraftId);
+}
+
+void Simulation::clear_selected_aircraft() {
+    selectedAircraftId = -1;
+}
+
+bool Simulation::plan_path_for_selected(float dest_lat, float dest_lon) {
+    Aircraft* aircraft = get_selected_aircraft();
+    if (!aircraft) return false;
+
+    auto start = aircraft->get_position();
+
+    PyGILState_STATE gstate = PyGILState_Ensure();
+    bool ok = false;
+
+    try {
+        LogMessage("[python] plan_path called");
+        auto bounds = getCoordinateSystem();
+        pybind11::object result = behavior_module.attr("plan_path")(
+            start.first, start.second,
+            dest_lat, dest_lon,
+            bounds.get_min_latitude(), bounds.get_max_latitude(),
+            bounds.get_min_longitude(), bounds.get_max_longitude(),
+            60, 40
+        );
+
+        std::vector<std::pair<float, float>> path;
+        if (pybind11::isinstance<pybind11::list>(result)) {
+            pybind11::list list = result.cast<pybind11::list>();
+            for (auto item : list) {
+                auto tup = item.cast<pybind11::tuple>();
+                if (tup.size() != 2) continue;
+                float lat = tup[0].cast<float>();
+                float lon = tup[1].cast<float>();
+                path.emplace_back(lat, lon);
+            }
+        }
+
+        if (!path.empty()) {
+            aircraft->set_path(path);
+            ok = true;
+            LogMessage("[python] plan_path returned " + std::to_string(path.size()) + " points");
+        }
+    }
+    catch (const pybind11::error_already_set& e) {
+        std::cerr << "Python error: " << e.what() << "\n";
+        LogMessage(std::string("[python] plan_path error: ") + e.what());
+    }
+
+    PyGILState_Release(gstate);
+    return ok;
+}
+
+int Simulation::add_airway_node(const std::string& name, float lat, float lon) {
+    AirwayNode node;
+    node.id = next_airway_node_id++;
+    node.name = name;
+    node.lat = lat;
+    node.lon = lon;
+    airway_nodes.push_back(node);
+    return node.id;
+}
+
+void Simulation::add_airway_edge(int from_id, int to_id, float cost) {
+    AirwayEdge edge;
+    edge.from_id = from_id;
+    edge.to_id = to_id;
+    edge.cost = cost;
+    airway_edges.push_back(edge);
+}
+
+void Simulation::clear_airways() {
+    airway_nodes.clear();
+    airway_edges.clear();
+    next_airway_node_id = 1;
+}
+
+const std::vector<Simulation::AirwayNode>& Simulation::get_airway_nodes() const {
+    return airway_nodes;
+}
+
+const std::vector<Simulation::AirwayEdge>& Simulation::get_airway_edges() const {
+    return airway_edges;
 }
 
 // Check if the simulation is running
@@ -99,7 +280,7 @@ void Simulation::render_single_aircraft(std::string color) {
     }
 }
 
-void Simulation::render_waypoint(std::string color, int x, int y) {
+void Simulation::render_waypoint(std::string color, float x, float y) {
     if (color == "Red") {
         add_waypoint("Fighter - Red", "Red", x, y, coordSystem);
     }
@@ -108,7 +289,7 @@ void Simulation::render_waypoint(std::string color, int x, int y) {
     }
 }
 
-void Simulation::render_single_aircraft(std::string color, int x, int y, float angle) {
+void Simulation::render_single_aircraft(std::string color, float x, float y, float angle) {
     if (color == "Red") {
         add_aircraft("Fighter - Red", "Red", 100, x, y, angle, 0.10f, coordSystem);
         //add_aircraft("Fighter - Red", "Red", 100, x, y, angle, 0.25f, coordSystem);
@@ -284,11 +465,17 @@ void Simulation::initialize() {
 
 // Python Process call
  
-    PyGILState_STATE gstate;
-    gstate = PyGILState_Ensure();
-
     try {
-        // Call the Python function and capture the return value
+        py::gil_scoped_acquire gil;
+        LogMessage("[python] initialize run_script()");
+
+        if (pybind11::hasattr(behavior_module, "run_script")) {
+            behavior_module.attr("run_script")();
+            LogMessage("[python] run_script completed");
+            return;
+        }
+
+        LogMessage("[python] initialize call_once()");
         pybind11::object result = behavior_module.attr("call_once")();
 
         // Process the returned value (example for a dictionary)
@@ -307,12 +494,12 @@ void Simulation::initialize() {
         else {
             std::cerr << "Unexpected return type from call_once\n";
         }
+
     }
     catch (const pybind11::error_already_set& e) {
         std::cerr << "Python error: " << e.what() << "\n";
+        LogMessage(std::string("[python] call_once error: ") + e.what());
     }
-
-    PyGILState_Release(gstate);
 
 }
 

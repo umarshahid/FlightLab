@@ -13,6 +13,7 @@
 #include "../Utils/enums.h"
 #include "deque"
 #include <memory>
+#include <optional>
 
 
 #include <pybind11/embed.h>
@@ -47,15 +48,40 @@ public:
     void initialize();
 
     void render_single_aircraft(std::string color);
-    void render_single_aircraft(std::string color, int x, int y, float angle);
+    void render_single_aircraft(std::string color, float x, float y, float angle);
     void onButtonclick(std::string color);
     void add_waypoint(const std::string& name, const std::string& force, float x, float y, CoordinateSystem& coordSystem);
-    void render_waypoint(std::string color, int x, int y);
+    void render_waypoint(std::string color, float x, float y);
     void processSimulation();
     SimulationObjectType getDeployMode();
     void setDeployMode(SimulationObjectType dm);
+    bool select_aircraft_at(int screen_x, int screen_y, float radius);
+    bool has_selected_aircraft() const;
+    Aircraft* get_selected_aircraft();
+    void clear_selected_aircraft();
+    bool plan_path_for_selected(float dest_lat, float dest_lon);
+    int add_airway_node(const std::string& name, float lat, float lon);
+    void add_airway_edge(int from_id, int to_id, float cost);
+    void clear_airways();
+    struct AirwayNode {
+        int id;
+        std::string name;
+        float lat;
+        float lon;
+    };
+    struct AirwayEdge {
+        int from_id;
+        int to_id;
+        float cost;
+    };
+    const std::vector<AirwayNode>& get_airway_nodes() const;
+    const std::vector<AirwayEdge>& get_airway_edges() const;
 
     CoordinateSystem getCoordinateSystem();
+    void setZoom(float zoom);
+    void setCoordinateBounds(float min_lat, float max_lat, float min_lon, float max_lon);
+    void setScreenSize(int screen_w, int screen_h);
+    void setMapTransform(double min_x, double max_x, double min_y, double max_y, int screen_w, int screen_h, float zoom_level);
     int setCoordinateSystem(float min_lat, float max_lat, float min_lon, float max_lon,
         int screen_w, int screen_h);
     std::string getSelectedAircraft();
@@ -67,10 +93,14 @@ private:
 
     std::string selectedAircraft;
     std::string selectedWaypoint;
+    int selectedAircraftId = -1;
 
     //std::vector<Aircraft*> aircrafts;
     std::vector<std::unique_ptr<Aircraft>> aircrafts;
     std::vector<Waypoint> waypoints;
+    std::vector<AirwayNode> airway_nodes;
+    std::vector<AirwayEdge> airway_edges;
+    int next_airway_node_id = 1;
 
 
     std::atomic<bool> running;
@@ -88,9 +118,11 @@ private:
     py::scoped_interpreter guard{}; 
     //// Import Python script
 
-    py::module behavior_module = py::module::import("aircraft_behavior");
+    py::module behavior_module;
 
     //################################ python ################################
+
+    Aircraft* get_aircraft_by_id(int id);
 };   
 
 #endif

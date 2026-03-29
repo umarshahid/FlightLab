@@ -22,6 +22,10 @@ class RenderManager
 
 	static SDL_Texture* loadTexture(SDL_Renderer* renderer, const std::string& path);
 	void applyColorMod(SDL_Texture* texture, std::string force) const;
+	void drawDigit(int digit, int x, int y, int scale, SDL_Color color) const;
+	void drawNumber(int value, int x, int y, int scale, SDL_Color color) const;
+	void drawChar(char c, int x, int y, int scale, SDL_Color color) const;
+	void drawText(const std::string& text, int x, int y, int scale, SDL_Color color) const;
 
 	std::string iconPathAircraft;
 	std::string iconPathWaypoint;
@@ -33,6 +37,7 @@ class RenderManager
 	std::vector<Button> buttons;
 	bool quit;
 	float angle = 0.0f;
+    float zoom = 1.0f;
 
 public:
 	RenderManager(const RenderManager&) = delete;
@@ -48,8 +53,11 @@ public:
 	void render_aircraft_preview(const std::string& force, int x, int y);
 	void drawAircraft(Aircraft* aircraft) const;
 	void drawWaypoint(Waypoint* waypoint) const;
-	void drawRadarCone(Radar* radar, int centerX, int centerY, float heading, std::string force) const;
+	void drawRadarCone(Radar* radar, float centerLat, float centerLon, float heading, std::string force) const;
 	void drawMissile(Missile* aircraft) const;
+	void drawPaths() const;
+	void drawAirways() const;
+    void drawGrid(const CoordinateSystem& coord) const;
 	SDL_Surface* ResizeSurface(SDL_Surface* source, int newWidth, int newHeight);
 	void applyLineColor(std::string force) const;
 	void lockLine(Vector3* target, Vector3* self, std::string force);
